@@ -1,45 +1,24 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Adapter.sol";
+import "./Sweepable.sol";
 
-interface UniswapRouter {
-    function swapExactTokensForTokensSimple(
-        uint amountIn,
-        uint amountOutMin,
-        address tokenFrom,
-        address tokenTo,
-        bool stable,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-}
-
-contract Swinger is Ownable {
+contract Swinger is Ownable, Sweepable {
     IERC20 public immutable mainAsset;
     IERC20 public immutable peggedAsset;
-    UniswapRouter public router;
-    bool public solidStableSwap;
+    Adapter public adapter;
     address public keeper;
     address public treasury;
     uint public lowerBound = 1086;
     uint public upperbound = 970;
 
-    constructor(address _mainAsset, address _peggedAsset, address _router, bool _solidStableSwap) {
+    constructor(address _mainAsset, address _peggedAsset, address _adapter) {
         mainAsset = IERC20(_mainAsset);
         peggedAsset = IERC20(_peggedAsset);
-        router = UniswapRouter(_router);
-        solidStableSwap = _solidStableSwap;
+        adapter = Adapter(_adapter);
         keeper = msg.sender;
         treasury = msg.sender;
     }
@@ -56,35 +35,12 @@ contract Swinger is Ownable {
         uint ratio = toPegged ? lowerBound : upperbound;
         uint amountOutMin = balance / 1000 * ratio;
         uint toBalance = to.balanceOf(treasury);
-        // approve router
-        from.approve(address(router), balance);
-        // transfer fro  treasury to this
-        from.transferFrom(treasury, address(this), balance);
 
-        if (solidStableSwap) {
-            router.swapExactTokensForTokensSimple(
-                balance,
-                amountOutMin,
-                address(from),
-                address(to),
-                true,
-                address(treasury),
-                block.timestamp
-            );
-        } else {
-            address[] memory route = new address[](2);
-            route[0] = address(from);
-            route[1] = address(to);
+        // transfer fro  treasury to the adapter
+        bool result = from.transferFrom(treasury, address(adapter), balance);
+        require(result, "transfer failed");
 
-            router.swapExactTokensForTokens(
-                balance,
-                amountOutMin,
-                route,
-                address(treasury),
-                block.timestamp
-            );
-        }
-
+        adapter.swap(from, to, balance, amountOutMin, treasury);
 
         uint newToBalance = to.balanceOf(address(treasury));
         require((newToBalance - toBalance) > amountOutMin, "too high slippage");
@@ -92,6 +48,14 @@ contract Swinger is Ownable {
         if (toPegged) {
             require(balance < newToBalance, "unexpected lower balance for pegged asset");
         }
+    }
+
+    function getRatio(uint amount, bool toPegged) public view returns (uint) {
+        IERC20 from = toPegged ? mainAsset : peggedAsset;
+        IERC20 to = toPegged ? peggedAsset : mainAsset;
+        uint balance = amount == 0 ? from.balanceOf(treasury) : amount;
+
+        return adapter.getRatio(from, to, balance);
     }
 
     function setLimits(uint _lowerBound, uint _upperBound) public onlyOwner {
@@ -105,11 +69,5 @@ contract Swinger is Ownable {
 
     function setTreasury(address _treasury) public onlyOwner {
         treasury = _treasury;
-    }
-
-    function sweep(address _erc) public onlyOwner {
-        IERC20 token = IERC20(_erc);
-        uint256 balance = token.balanceOf(address(this));
-        token.transferFrom(address(this), msg.sender, balance);
     }
 }

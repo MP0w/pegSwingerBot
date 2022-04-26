@@ -1,19 +1,9 @@
-account_id: ""
+account_id: 2dcb4c0a-0357-4fda-b2ea-a7232bf789fb
 exports:
-  ftm-local:
-    project_slug: mpow/ftm-local
-    rpc_address: 127.0.0.1:7545
-    protocol: ""
+  bot:
     forked_network: Fantom
-    chain_config:
-      homestead_block: 0
-      eip150_block: 0
-      eip150_hash: "0x0000000000000000000000000000000000000000000000000000000000000000"
-      eip155_block: 0
-      eip158_block: 0
-      byzantium_block: 0
-      constantinople_block: 0
-      petersburg_block: 0
-      istanbul_block: 0
-      berlin_block: 0
-project_slug: ""
+    project_slug: mpow/bot
+    protocol: ""
+    rpc_address: 127.0.0.1:8545
+project_slug: bot
+provider: Hardhat

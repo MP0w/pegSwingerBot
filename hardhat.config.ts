@@ -6,6 +6,8 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "@tenderly/hardhat-tenderly"
+import "@nomiclabs/hardhat-ganache";
 
 dotenv.config();
 
@@ -19,19 +21,21 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-const config: HardhatUserConfig = {
+const config = {
   solidity: "0.8.4",
+  defaultNetwork: "localhost",
   networks: {
-    local: {
-      url: "HTTP://127.0.0.1:7545",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
+    ganache: {
+      url: "http://127.0.0.1:8545",
+      defaultBalanceEther: 1000,
+      fork: "https://rpc.ftm.tools",
+      forkBlockNumber: "37000533"
+    }
   },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-  }
+  tenderly: {
+		username: "mpow",
+		project: "bot"
+	}
 };
 
 export default config;
