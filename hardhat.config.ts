@@ -29,13 +29,27 @@ const config = {
       url: "http://127.0.0.1:8545",
       defaultBalanceEther: 1000,
       fork: "https://rpc.ftm.tools",
-      forkBlockNumber: "37000533"
+      forkBlockNumber: "37207966"
+    },
+    localhost: {
+      defaultBalanceEther: 1000,
+      fork: "https://rpc.ftm.tools",
+      forkBlockNumber: "37207966"
+    },
+    fantom: {
+      url: "https://rpc.ftm.tools",
+      accounts: { mnemonic: process.env.MNEMONIC_WALLET }
     }
   },
   tenderly: {
 		username: "mpow",
 		project: "bot"
-	}
+	},
+  etherscan: {
+    apiKey: {
+      opera: process.env.FTMSCAN_KEY,
+    }
+  },
 };
 
 export default config;

@@ -17,7 +17,7 @@ async function verifySwings(adapter: string) {
   await WFTM.approve(swinger.address, balance)
   await swinger.setLimits(1000, 900)
   // swing to beFTM
-  await swinger.swing(true, { gasLimit: 2000000 })
+  await swinger.swing(true)
 
   expect(await WFTM.balanceOf(address)).to.equal(0)
   expect(await BEFTM.balanceOf(address)).to.not.equal(0)

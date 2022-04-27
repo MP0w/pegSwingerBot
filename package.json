@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "npx hardhat run scripts/bot.ts --network fantom",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,6 +19,7 @@
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.3.1",
+    "@types/express": "^4.17.13",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.20.49",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
