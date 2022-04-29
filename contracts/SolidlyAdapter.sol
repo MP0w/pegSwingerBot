@@ -23,9 +23,11 @@ interface SolidlyFixedRouter {
 
 contract SolidlyAdapter is Adapter, Sweepable {
     address public override immutable router;
+    address public immutable fixedRouter;
 
-    constructor(address _router) {
+    constructor(address _router, address _fixedRouter) {
         router = _router;
+        fixedRouter = _fixedRouter;
     }
 
     function swap(IERC20 from, IERC20 to, uint amount, uint minOut, address destination) public override {
@@ -43,9 +45,9 @@ contract SolidlyAdapter is Adapter, Sweepable {
     }
 
     function getRatio(IERC20 from, IERC20 to, uint amount) public override view returns (uint) {
-        SolidlyFixedRouter fixedRouter = SolidlyFixedRouter(0x0f68551237a7efFe35600524c0dD4989bF8208e9);
+        SolidlyFixedRouter _fixedRouter = SolidlyFixedRouter(fixedRouter);
 
-        uint amountOut = fixedRouter.getAmountOut(
+        uint amountOut = _fixedRouter.getAmountOut(
             amount,
             address(from),
             address(to),

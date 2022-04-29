@@ -1,8 +1,7 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
-import { ERC20_ABI, WFTM_ABI, WFTM_ADDRESS, BEFTM_ADDRESS, SOLIDLY_ROUTER, SPIRITSWAP_ROUTER } from "../scripts/abi";
-import { Adapter, Swinger } from "../typechain";
+import { WFTM_ABI, WFTM_ADDRESS, BEFTM_ADDRESS, SOLIDLY_ROUTER, SOLIDLY_FIXED_ROUTER, SPIRITSWAP_ROUTER } from "../scripts/abi";
+import { IERC20__factory } from "../typechain";
 
 async function verifySwings(adapter: string) {
   const Swinger = await ethers.getContractFactory("Swinger")
@@ -10,7 +9,7 @@ async function verifySwings(adapter: string) {
   const address = await swinger.owner()
   const amountToWrap = ethers.utils.parseEther("100")
   const WFTM = await ethers.getContractAt(WFTM_ABI, WFTM_ADDRESS)
-  const BEFTM = await ethers.getContractAt(ERC20_ABI, BEFTM_ADDRESS)
+  const BEFTM = await ethers.getContractAt(IERC20__factory.abi, BEFTM_ADDRESS)
 
   await WFTM.deposit({ value: amountToWrap })
   const balance = await WFTM.balanceOf(address)
@@ -34,7 +33,7 @@ async function verifySwings(adapter: string) {
 describe("Solidly Integration test", function () {
   it("should swing WFTM to beFTM", async function () {
     const Adapter = await ethers.getContractFactory("SolidlyAdapter")
-    const adapter = await Adapter.deploy(SOLIDLY_ROUTER)  
+    const adapter = await Adapter.deploy(SOLIDLY_ROUTER, SOLIDLY_FIXED_ROUTER)
 
     await verifySwings(adapter.address)
   });

@@ -1,10 +1,10 @@
 import { ethers, tenderly } from "hardhat";
-import { WFTM_ADDRESS, BEFTM_ADDRESS, SOLIDLY_ROUTER } from "../scripts/abi";
+import { WFTM_ADDRESS, BEFTM_ADDRESS, SOLIDLY_ROUTER, SOLIDLY_FIXED_ROUTER } from "../scripts/abi";
 import "@nomiclabs/hardhat-ganache";
 
 async function main() {
   const Adapter = await ethers.getContractFactory("SolidlyAdapter")
-  const adapter = await Adapter.deploy(SOLIDLY_ROUTER)
+  const adapter = await Adapter.deploy(SOLIDLY_ROUTER, SOLIDLY_FIXED_ROUTER)
   await adapter.deployed()
   const Swinger = await ethers.getContractFactory("Swinger")
   const swinger = await Swinger.deploy(WFTM_ADDRESS, BEFTM_ADDRESS, adapter.address)
