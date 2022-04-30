@@ -42,7 +42,10 @@ async function runLoop() {
     const lowerbound = 1000 / Number(await swinger.lowerBound()) * 1000 // contract is flipped
 
     try {
-        await checkSwing(swinger, treasury, Number(upperbound), Number(lowerbound))
+        while (true) {
+            await checkSwing(swinger, treasury, Number(upperbound), Number(lowerbound))
+            await sleep(1)
+        }
     } catch (error) {
         console.log(error)
         await sleep(5)
@@ -61,9 +64,6 @@ async function checkSwing(swinger: Swinger, treasury: string, upperbound: number
 
     const beftmBalance = ethers.BigNumber.from(await BEFTM.balanceOf(treasury))
     await swingIfNeeded(swinger, beftmBalance, false, upperbound)
-  
-    await sleep(1)
-    await checkSwing(swinger, treasury, upperbound, lowerBound)
 }
 
 async function adjustedGasPrice(): Promise<BigNumber> {
